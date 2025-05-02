@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>3D Dice Roll</title>
+    <style>
+        body { margin: 0; overflow: hidden; }
+        #btn { position: absolute; top: 20px; left: 20px; padding: 10px; font-size: 16px; z-index: 1; }
+    </style>
+</head>
+<body>
+<button id="btn">🎲 주사위 던지기</button>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // 주사위 만들기
+    const diceSize = 1;
+    const geometry = new THREE.BoxGeometry(diceSize, diceSize, diceSize);
+    const materials = [];
+
+
+
+    const dotTextures = [
+        'https://i.imgur.com/NfPX71d.png', // 1
+        'https://i.imgur.com/U4WQ3Ev.png', // 2
+        'https://i.imgur.com/M9PzB14.png', // 3
+        'https://i.imgur.com/9h5OVxo.png', // 4
+        'https://i.imgur.com/sfwXDaS.png', // 5
+        'https://i.imgur.com/IvTiZzR.png'  // 6
+    ];
+
+    for (let i = 0; i < 6; i++) {
+        const tex = new THREE.TextureLoader().load(dotTextures[i]);
+        materials.push(new THREE.MeshBasicMaterial({ map: tex }));
+    }
+
+    const dice = new THREE.Mesh(geometry, materials);
+    scene.add(dice);
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(1, 2, 3).normalize();
+    scene.add(light);
+
+    camera.position.z = 3;
+
+    let rolling = false;
+
+    function rollDice() {
+        if (rolling) return;
+        rolling = true;
+
+        // 목표 회전값 계산
+        const faceToRotation = [
+            [0, 0],                  // 1 (앞면)
+            [0, Math.PI / 2],        // 2 (오른쪽)
+            [Math.PI / 2, 0],        // 3 (윗면)
+            [-Math.PI / 2, 0],       // 4 (아랫면)
+            [0, -Math.PI / 2],       // 5 (왼쪽)
+            [Math.PI, 0]             // 6 (뒷면)
+        ];
+
+        const result = Math.floor(Math.random() * 6); // 0 ~ 5
+        const [targetX, targetY] = faceToRotation[result];
+
+        let t = 0;
+        const startX = dice.rotation.x;
+        const startY = dice.rotation.y;
+
+        function animateRoll() {
+            t += 0.05;
+            if (t < 1) {
+                dice.rotation.x = startX + (targetX + Math.PI * 4 - startX) * t;
+                dice.rotation.y = startY + (targetY + Math.PI * 4 - startY) * t;
+                requestAnimationFrame(animateRoll);
+            } else {
+                dice.rotation.x = targetX;
+                dice.rotation.y = targetY;
+                rolling = false;
+                alert(`🎯 결과: ${result + 1}`);
+            }
+        }
+
+        animateRoll();
+    }
+
+    document.getElementById('btn').addEventListener('click', rollDice);
+
+    function animate() {
+        requestAnimationFrame(animate);
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth/window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+</script>
+</body>
+</html>

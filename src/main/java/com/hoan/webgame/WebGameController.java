@@ -10,4 +10,9 @@ public class WebGameController {
     public String getFirstGame() {
         return "ping-pong";
     }
+
+    @GetMapping("/3d-dice")
+    public String getDiceGame() {
+        return "dice";
+    }
 }
