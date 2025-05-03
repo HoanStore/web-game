@@ -15,4 +15,9 @@ public class WebGameController {
     public String getDiceGame() {
         return "dice";
     }
+
+    @GetMapping("/tetris")
+    public String getBallGame() {
+        return "tetris";
+    }
 }
