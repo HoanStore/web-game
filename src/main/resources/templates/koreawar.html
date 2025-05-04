@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>영역 점령 게임</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    #map { height: 100vh; }
+    .owner-label {
+      font-size: 10px;
+      color: white;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  const playerName = prompt("플레이어 이름을 입력하세요:");
+
+  const map = L.map('map').setView([37.5665, 126.9780], 15); // 서울 중심
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+  const gridSize = 0.002; // 약 200m 간격
+  const bounds = map.getBounds();
+  const startLat = bounds.getSouth();
+  const startLng = bounds.getWest();
+  const endLat = bounds.getNorth();
+  const endLng = bounds.getEast();
+
+  const ownedCells = {}; // 셀 점령 정보 저장
+
+  function drawGrid() {
+    for (let lat = startLat; lat < endLat; lat += gridSize) {
+      for (let lng = startLng; lng < endLng; lng += gridSize) {
+        const cellKey = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+        if (ownedCells[cellKey]) continue;
+
+        const bounds = [
+          [lat, lng],
+          [lat + gridSize, lng + gridSize]
+        ];
+        const rect = L.rectangle(bounds, {
+          color: "#888",
+          weight: 1,
+          fillOpacity: 0.1
+        }).addTo(map);
+
+        rect.on('click', () => {
+          if (ownedCells[cellKey]) return;
+
+          rect.setStyle({ fillColor: "#2ecc71", fillOpacity: 0.6 });
+          const center = [(lat + lat + gridSize) / 2, (lng + lng + gridSize) / 2];
+          const label = L.marker(center, {
+            icon: L.divIcon({
+              className: 'owner-label',
+              html: playerName,
+              iconSize: [60, 20]
+            })
+          }).addTo(map);
+
+          ownedCells[cellKey] = playerName;
+        });
+      }
+    }
+  }
+
+  map.on('moveend', () => {
+    drawGrid();
+  });
+
+  drawGrid();
+</script>
+</body>
+</html>

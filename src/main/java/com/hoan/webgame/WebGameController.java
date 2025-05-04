@@ -20,4 +20,9 @@ public class WebGameController {
     public String getBallGame() {
         return "tetris";
     }
+
+    @GetMapping("/korea-war")
+    public String getKoreaWarGame() {
+        return "koreawar";
+    }
 }
