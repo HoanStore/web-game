@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>공 피하기 게임</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #111; color: white; font-family: sans-serif; text-align: center; }
+    #game {
+      position: relative;
+      margin: 20px auto;
+      background: #222;
+      width: 400px;
+      height: 600px;
+      border: 2px solid #444;
+      overflow: hidden;
+    }
+    .player {
+      position: absolute;
+      bottom: 10px;
+      width: 50px;
+      height: 50px;
+      background: lime;
+      left: 175px;
+    }
+    .ball {
+      position: absolute;
+      top: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: crimson;
+    }
+    #score {
+      margin-top: 10px;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+
+<h1>공 피하기 게임</h1>
+<div id="score">점수: 0</div>
+<div id="game">
+  <div class="player" id="player"></div>
+</div>
+
+<script>
+  const game = document.getElementById('game');
+  const player = document.getElementById('player');
+  const scoreEl = document.getElementById('score');
+
+  let playerX = 175;
+  const playerSpeed = 10;
+  const gameWidth = 400;
+  const gameHeight = 600;
+  let score = 0;
+  let gameInterval;
+  let isGameOver = false;
+
+  document.addEventListener('keydown', (e) => {
+    if (isGameOver) return;
+    if (e.key === 'ArrowLeft') {
+      playerX = Math.max(0, playerX - playerSpeed);
+    } else if (e.key === 'ArrowRight') {
+      playerX = Math.min(gameWidth - 50, playerX + playerSpeed);
+    }
+    player.style.left = playerX + 'px';
+  });
+
+  function createBall() {
+    const ball = document.createElement('div');
+    ball.classList.add('ball');
+    ball.style.left = Math.random() * (gameWidth - 30) + 'px';
+    ball.style.top = '0px';
+    game.appendChild(ball);
+
+    let ballY = 0;
+    const fallSpeed = 3 + Math.random() * 3;
+
+    function moveBall() {
+      if (isGameOver) return;
+      ballY += fallSpeed;
+      ball.style.top = ballY + 'px';
+
+      // 충돌 체크
+      const ballX = parseFloat(ball.style.left);
+      const playerY = gameHeight - 60;
+
+      if (
+              ballY + 30 >= playerY &&
+              ballX < playerX + 50 &&
+              ballX + 30 > playerX
+      ) {
+        endGame();
+      }
+
+      if (ballY < gameHeight) {
+        requestAnimationFrame(moveBall);
+      } else {
+        ball.remove();
+      }
+    }
+
+    requestAnimationFrame(moveBall);
+  }
+
+  function startGame() {
+    gameInterval = setInterval(() => {
+      createBall();
+      score++;
+      scoreEl.textContent = '점수: ' + score;
+    }, 800);
+  }
+
+  function endGame() {
+    isGameOver = true;
+    clearInterval(gameInterval);
+    alert('게임 오버! 점수: ' + score);
+    location.reload();
+  }
+
+  startGame();
+</script>
+
+</body>
+</html>

@@ -25,4 +25,9 @@ public class WebGameController {
     public String getKoreaWarGame() {
         return "koreawar";
     }
+
+    @GetMapping("/avoid-ball")
+    public String getAvoidBall() {
+        return "avoid-ball";
+    }
 }
